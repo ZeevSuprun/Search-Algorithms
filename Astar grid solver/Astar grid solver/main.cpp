@@ -3,7 +3,6 @@
 //  Astar grid solver
 //
 //  Created by Zeev Suprun on 2015-02-25.
-//  Copyright (c) 2015 Zeev Suprun. All rights reserved.
 //
 
 #include <iostream>
@@ -102,7 +101,9 @@ struct nodeList {
     
 };
 
-Node testNodeReturn ();
+//A* maze solver
+nodeList solve(int startRow, int startCol, int endRow, int endCol, char arena[8][7]);
+
 int main(int argc, const char * argv[])
 {
     /*
@@ -118,24 +119,54 @@ int main(int argc, const char * argv[])
     
     list1.addNode(Node(0,0,0,5,5,nullptr));
     */
-    Node tryThis = testNodeReturn();
-    std::cout << tryThis.parent->row;
-    //The above print statement prints the row of parent. but parent was declared as a local variable in a function.
-    //So how come parent persists? What gives? Is it because I didn't define a destructor? Ask Dad about this.
+    /*
+     One possible obstacle configuration:
+     
+     0000000
+     0000xx0
+     0000xx0
+     00xx000
+     00xx000
+     0000000
+     0000000
+     x00000x
+     top left corner is (0,0)
+     using (row, column), not (x,y)
+     */
+    char arena[8][7];
+    //populating the arena
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 7; j++) {
+            arena[i][j] = '0';
+        }
+    }
+    arena[7][0] = 'x';
+    arena[7][6] = 'x';
+    arena[4][2] = 'x';
+    arena[4][3] = 'x';
+    arena[3][2] = 'x';
+    arena[3][3] = 'x';
+    arena[1][4] = 'x';
+    arena[1][5] = 'x';
+    arena[2][4] = 'x';
+    arena[2][5] = 'x';
+    
+    nodeList path = solve(7, 3, 0, 0, arena);
+    
+    int r, c;
+    for (int i = 0; i < path.numElements; i++) {
+        r = path.list[i].row;
+        c = path.list[i].col;
+        std::cout << '(' << r << ',' << c << ")\n";
+    }
+    
     
     return 0;
 }
 
-Node testNodeReturn () {
-    nodeList test;
-    Node parent(9, 0, 0, 0, 0, nullptr);
-    test.addNode(Node(8, 0, 0, 0, 0, &parent));
-    
-    return test.list[0];
-}
-
 nodeList solve(int startRow, int startCol, int endRow, int endCol, char arena[8][7]) {
-    //arena is filled with '0' and 'x'
+    //arena is filled with '0' and 'x' for allowed and blocked spaces, respectively.
+    //Arena can only be an 8*7 grid because this was the size of the grid the robot could maneuver on.
     
     //list of grid points still to check.
     nodeList openList;
@@ -147,10 +178,8 @@ nodeList solve(int startRow, int startCol, int endRow, int endCol, char arena[8]
     nodeList path;
     Node nextInPath;
     
-    
     //Check all squares adjacent to start point and add them in the open list if
     //they are valid places to go. Drop the start square into the closed list.
-    
     
     //Choose the lowest F square in the open list, check all adjacent squares
     //and add them to the open list if they aren't there already.
@@ -179,7 +208,6 @@ nodeList solve(int startRow, int startCol, int endRow, int endCol, char arena[8]
         canGoLeft = (toCheck.col - 1 >= 0) and arena[toCheck.row][toCheck.col - 1] != 'x';
         canGoUp = (toCheck.row - 1 >= 0) and arena[toCheck.row - 1][toCheck.col] != 'x';
         canGoDown = (toCheck.row + 1 < 8) and arena[toCheck.row + 1][toCheck.col] != 'x';
-        
         
         //These 4 if statements add the 4 directions to the open list if they are valid points.
         //They also check to see if any of the new grid points added are the destination.
