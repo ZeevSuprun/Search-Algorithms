@@ -1,0 +1,3 @@
+Maze 1: Solved in 13 moves.
+Maze 2: Solved in 34 moves.
+Maze 3: Unsolvable
